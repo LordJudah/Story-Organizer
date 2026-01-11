@@ -1,0 +1,277 @@
+{
+  "app_name": "Media Story Organizer",
+  "version": "1.0",
+  "tagline": "Transform scattered memories into narrated visual stories",
+  
+  "overview": {
+    "description": "An intelligent media analysis and storytelling application that transforms unorganized photos and videos into cohesive, narrated presentations. Users upload media files, provide optional creative direction, and receive a sequenced slideshow with downloadable narration scripts.",
+    "primary_use_case": "Converting personal media collections (travel footage, event photos, project documentation) into professional-quality presentations with synchronized narration text."
+  },
+
+  "core_features": {
+    "media_analysis": {
+      "description": "AI-powered analysis of uploaded images and videos",
+      "capabilities": [
+        "Object and scene recognition (architecture, nature, people, activities)",
+        "Location identification via visual landmarks and metadata",
+        "Temporal sequencing using EXIF data and visual context clues",
+        "Mood and atmosphere detection (lighting, colors, energy)",
+        "Text and signage extraction (OCR)",
+        "Face detection for consistent person tracking across media",
+        "Video keyframe extraction for scene summarization"
+      ]
+    },
+
+    "intelligent_organization": {
+      "description": "Context-aware sequencing based on user intent",
+      "capabilities": [
+        "Thematic clustering (group by subject, location, or activity)",
+        "Chronological reconstruction when metadata is available",
+        "Narrative arc creation (beginning, development, climax, resolution)",
+        "Relevance filtering based on user prompt",
+        "Duplicate and near-duplicate detection",
+        "Quality scoring to prioritize best shots"
+      ]
+    },
+
+    "narration_generation": {
+      "description": "Scene-by-scene narration text creation",
+      "capabilities": [
+        "Contextual storytelling matching visual content",
+        "Tone customization (documentary, personal memoir, educational)",
+        "Timing suggestions for voice-over pacing",
+        "Transition language between scenes",
+        "Historical and cultural context integration when relevant",
+        "Multiple narration style options per project"
+      ]
+    },
+
+    "export_options": {
+      "description": "Downloadable outputs for presentation creation",
+      "formats": [
+        {
+          "type": "narration_script",
+          "formats": ["TXT", "DOCX", "PDF"],
+          "includes": ["Scene numbers", "Timing cues", "Image references"]
+        },
+        {
+          "type": "media_sequence",
+          "formats": ["ZIP (ordered files)", "JSON manifest"],
+          "includes": ["Renamed files with sequence numbers", "Metadata summary"]
+        },
+        {
+          "type": "presentation_ready",
+          "formats": ["PPTX", "Google Slides compatible"],
+          "includes": ["Sequenced slides", "Speaker notes with narration"]
+        },
+        {
+          "type": "video_timeline",
+          "formats": ["EDL", "XML (Premiere/DaVinci compatible)"],
+          "includes": ["Suggested durations", "Transition markers"]
+        }
+      ]
+    }
+  },
+
+  "user_workflow": {
+    "steps": [
+      {
+        "step": 1,
+        "name": "Upload Media",
+        "description": "User uploads images and/or videos from their device or cloud storage",
+        "accepted_formats": {
+          "images": ["JPG", "JPEG", "PNG", "HEIC", "RAW", "WEBP"],
+          "videos": ["MP4", "MOV", "AVI", "MKV", "WEBM"]
+        },
+        "upload_methods": ["Drag and drop", "File browser", "Cloud import (Google Drive, Dropbox, iCloud)"],
+        "limits": {
+          "max_files": 500,
+          "max_total_size": "10GB",
+          "max_video_length": "30 minutes per file"
+        }
+      },
+      {
+        "step": 2,
+        "name": "Provide Creative Direction (Optional)",
+        "description": "User enters a prompt to guide the organization and narration style",
+        "prompt_field": {
+          "label": "What story do you want to tell?",
+          "placeholder": "Example: Turn these images and videos from my trip to Peru in 2018 into a presentation focused on the ancient architecture I witnessed during my time there.",
+          "max_length": 1000,
+          "optional": true
+        },
+        "additional_options": {
+          "tone_selector": ["Documentary", "Personal/Memoir", "Educational", "Cinematic", "Casual/Fun"],
+          "target_length": ["Short (2-5 min)", "Medium (5-15 min)", "Long (15-30 min)", "Auto"],
+          "focus_elements": ["People", "Places", "Activities", "Objects", "Timeline", "Auto-detect"]
+        }
+      },
+      {
+        "step": 3,
+        "name": "Analysis & Processing",
+        "description": "App analyzes all uploaded media and generates organizational structure",
+        "processing_stages": [
+          "Extracting metadata and visual features",
+          "Identifying scenes, subjects, and themes",
+          "Applying user prompt filters and priorities",
+          "Generating optimal sequence",
+          "Creating narration draft"
+        ],
+        "user_feedback": "Progress indicator with stage descriptions"
+      },
+      {
+        "step": 4,
+        "name": "Review & Refine",
+        "description": "User reviews the proposed sequence and narration",
+        "interface_features": [
+          "Thumbnail timeline view with drag-to-reorder",
+          "Side-by-side media preview and narration text",
+          "Edit narration text directly",
+          "Add/remove media from sequence",
+          "Split or merge scenes",
+          "Regenerate narration for specific sections"
+        ]
+      },
+      {
+        "step": 5,
+        "name": "Export & Download",
+        "description": "User downloads their organized presentation materials",
+        "export_bundle_options": [
+          "Narration script only",
+          "Organized media files only",
+          "Complete presentation package",
+          "Video editor timeline"
+        ]
+      }
+    ]
+  },
+
+  "example_scenarios": [
+    {
+      "scenario": "Travel Documentation",
+      "user_input": {
+        "media": "247 photos and 12 videos from Peru trip (2018)",
+        "prompt": "Turn these images and videos from my trip to Peru in 2018 into a presentation focused on the ancient architecture I witnessed during my time there."
+      },
+      "app_output": {
+        "sequence_structure": [
+          {
+            "scene": 1,
+            "title": "Arrival in Lima",
+            "media_count": 8,
+            "narration_preview": "My journey into Peru's architectural past began in Lima, where Spanish colonial buildings first hinted at the layers of history I was about to uncover..."
+          },
+          {
+            "scene": 2,
+            "title": "Sacred Valley Foundations",
+            "media_count": 15,
+            "narration_preview": "The Sacred Valley revealed the genius of Incan engineering—terraces carved into mountainsides that have endured centuries..."
+          },
+          {
+            "scene": 3,
+            "title": "Machu Picchu: Crown Jewel",
+            "media_count": 42,
+            "narration_preview": "Standing before Machu Picchu at sunrise, I understood why the Incas chose this impossible location. Every stone placed with intention..."
+          }
+        ],
+        "total_scenes": 12,
+        "estimated_runtime": "18 minutes",
+        "excluded_media": "89 files (food photos, selfies, unrelated content)"
+      }
+    },
+    {
+      "scenario": "Family Event",
+      "user_input": {
+        "media": "180 photos and 8 videos from wedding weekend",
+        "prompt": "Create a chronological highlight reel of my daughter's wedding, focusing on emotional moments."
+      },
+      "app_output": {
+        "sequence_structure": [
+          {
+            "scene": 1,
+            "title": "Morning Preparations",
+            "media_count": 12,
+            "narration_preview": "The day began with quiet anticipation..."
+          }
+        ],
+        "total_scenes": 8,
+        "estimated_runtime": "12 minutes"
+      }
+    },
+    {
+      "scenario": "No Prompt Provided",
+      "user_input": {
+        "media": "156 mixed photos from phone camera roll",
+        "prompt": null
+      },
+      "app_output": {
+        "auto_detected_themes": ["Beach vacation", "City exploration", "Food experiences"],
+        "suggested_narratives": [
+          "Complete chronological journey",
+          "Best moments highlights",
+          "Location-based chapters"
+        ],
+        "user_action_required": "Select preferred organization approach"
+      }
+    }
+  ],
+
+  "technical_requirements": {
+    "ai_capabilities_needed": [
+      "Vision model for image/video analysis",
+      "Large language model for narration generation",
+      "Embedding model for semantic similarity clustering"
+    ],
+    "data_handling": {
+      "privacy": "All media processed locally or in secure cloud environment",
+      "retention": "User controls data retention period",
+      "metadata_extraction": "EXIF, GPS, timestamps preserved and utilized"
+    },
+    "performance_targets": {
+      "analysis_speed": "~2 seconds per image, ~10 seconds per minute of video",
+      "max_concurrent_users": "Scalable based on infrastructure"
+    }
+  },
+
+  "ui_components": {
+    "upload_zone": {
+      "type": "drag_drop_area",
+      "features": ["Multi-file support", "Progress indicators", "Thumbnail previews"]
+    },
+    "prompt_input": {
+      "type": "text_area",
+      "features": ["Character counter", "Prompt suggestions", "Example templates"]
+    },
+    "timeline_editor": {
+      "type": "horizontal_scrollable",
+      "features": ["Drag reorder", "Scene grouping", "Zoom controls"]
+    },
+    "narration_editor": {
+      "type": "rich_text",
+      "features": ["Per-scene editing", "Timing markers", "Word count"]
+    },
+    "preview_panel": {
+      "type": "media_viewer",
+      "features": ["Slideshow preview", "Narration sync playback"]
+    },
+    "export_modal": {
+      "type": "options_dialog",
+      "features": ["Format selection", "Quality settings", "Bundle options"]
+    }
+  },
+
+  "success_metrics": {
+    "user_goals": [
+      "Transform forgotten media into shareable stories",
+      "Save hours of manual organization work",
+      "Create professional-quality presentations without expertise",
+      "Rediscover memories through AI-assisted curation"
+    ],
+    "measurable_outcomes": [
+      "Time saved vs. manual organization",
+      "Percentage of uploaded media successfully categorized",
+      "User satisfaction with generated narration",
+      "Export completion rate"
+    ]
+  }
+}
