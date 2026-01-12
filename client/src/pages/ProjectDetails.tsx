@@ -132,6 +132,8 @@ export default function ProjectDetails() {
               {analyzeProject.isPending ? "Analyzing..." : "Analyze Media"}
             </Button>
             <ObjectUploader
+              maxFileSize={52428800}
+              maxNumberOfFiles={20}
               onGetUploadParameters={getUploadParams}
               onComplete={handleUploadComplete}
               buttonClassName="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
@@ -193,6 +195,8 @@ export default function ProjectDetails() {
                   <h3 className="text-lg font-medium mb-1">No media yet</h3>
                   <p className="mb-6">Upload photos and videos to get started</p>
                   <ObjectUploader
+                    maxFileSize={52428800}
+                    maxNumberOfFiles={20}
                     onGetUploadParameters={getUploadParams}
                     onComplete={handleUploadComplete}
                   >
