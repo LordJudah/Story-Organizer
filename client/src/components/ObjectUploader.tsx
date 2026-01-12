@@ -96,6 +96,8 @@ export function ObjectUploader({
         open={showModal}
         onRequestClose={() => setShowModal(false)}
         proudlyDisplayPoweredByUppy={false}
+        width="100%"
+        height="100%"
       />
     </div>
   );
