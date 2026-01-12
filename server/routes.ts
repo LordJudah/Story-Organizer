@@ -1,8 +1,11 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
 import { api } from "@shared/routes";
 import { z } from "zod";
+import * as schema from "@shared/schema";
+import { eq } from "drizzle-orm";
 import OpenAI from "openai";
 import { batchProcess } from "./replit_integrations/batch";
 
@@ -286,6 +289,3 @@ export async function registerRoutes(
 
   return httpServer;
 }
-
-import * as schema from "@shared/schema";
-import { eq } from "drizzle-orm";

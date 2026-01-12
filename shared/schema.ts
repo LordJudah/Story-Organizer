@@ -218,6 +218,11 @@ export type InsertMediaItem = z.infer<typeof insertMediaItemSchema>;
 export type InsertScene = z.infer<typeof insertSceneSchema>;
 export type InsertExport = z.infer<typeof insertExportSchema>;
 
+export type Project = typeof projects.$inferSelect;
+export type MediaItem = typeof mediaItems.$inferSelect;
+export type Scene = typeof scenes.$inferSelect;
+export type Export = typeof exports.$inferSelect;
+
 /*
 export type InsertConversation = any;
 export type InsertMessage = any;
