@@ -48,6 +48,10 @@ export function CreateProjectDialog() {
     });
   };
 
+  const handleFormSubmit = form.handleSubmit(onSubmit, (errors) => {
+    console.log("Form validation errors:", errors);
+  });
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -56,7 +60,10 @@ export function CreateProjectDialog() {
           New Project
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] glass-panel border-border/50">
+      <DialogContent 
+        className="sm:max-w-[500px] glass-panel border-border/50"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Create Story</DialogTitle>
           <DialogDescription>
@@ -65,7 +72,7 @@ export function CreateProjectDialog() {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-4">
+          <form onSubmit={handleFormSubmit} className="space-y-6 pt-4">
             <FormField
               control={form.control}
               name="title"
@@ -106,13 +113,16 @@ export function CreateProjectDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tone</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value || "Documentary"}>
+                    <Select onValueChange={field.onChange} value={field.value || "Documentary"}>
                       <FormControl>
                         <SelectTrigger className="bg-background/50">
                           <SelectValue placeholder="Select a tone" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent 
+                        onCloseAutoFocus={(e) => e.preventDefault()}
+                        className="z-[100]"
+                      >
                         <SelectItem value="Documentary">Documentary</SelectItem>
                         <SelectItem value="Cinematic">Cinematic</SelectItem>
                         <SelectItem value="Personal">Personal</SelectItem>
@@ -131,13 +141,16 @@ export function CreateProjectDialog() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Length</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value || "Medium"}>
+                    <Select onValueChange={field.onChange} value={field.value || "Medium"}>
                       <FormControl>
                         <SelectTrigger className="bg-background/50">
                           <SelectValue placeholder="Target length" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent 
+                        onCloseAutoFocus={(e) => e.preventDefault()}
+                        className="z-[100]"
+                      >
                         <SelectItem value="Short">Short (&lt; 1min)</SelectItem>
                         <SelectItem value="Medium">Medium (1-3 min)</SelectItem>
                         <SelectItem value="Long">Long (3min+)</SelectItem>
