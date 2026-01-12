@@ -24,9 +24,11 @@ import {
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const createProject = useCreateProject();
   
   const form = useForm<CreateProjectRequest>({
@@ -41,9 +43,10 @@ export function CreateProjectDialog() {
 
   const onSubmit = (data: CreateProjectRequest) => {
     createProject.mutate(data, {
-      onSuccess: () => {
+      onSuccess: (project) => {
         setOpen(false);
         form.reset();
+        setLocation(`/project/${project.id}`);
       },
     });
   };
