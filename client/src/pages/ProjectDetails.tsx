@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRoute, Link } from "wouter";
 import { useProject, useAnalyzeProject } from "@/hooks/use-projects";
 import { useMedia, useCreateMedia, useDeleteMedia } from "@/hooks/use-media";
@@ -37,19 +37,31 @@ export default function ProjectDetails() {
   const analyzeProject = useAnalyzeProject();
 
   const [activeTab, setActiveTab] = useState("media");
+  
+  // Track file ID to objectPath mapping (Uppy doesn't persist meta changes in getUploadParameters)
+  const filePathMapRef = useRef<Map<string, string>>(new Map());
 
   // Handle file uploads using the ObjectUploader component logic
   const handleUploadComplete = (result: any) => {
     // Uppy result.successful is an array of uploaded files
     result.successful.forEach((file: any) => {
+      const objectPath = filePathMapRef.current.get(file.id);
+      if (!objectPath) {
+        console.error("Missing objectPath for uploaded file:", file.name, file.id);
+        return;
+      }
+      
       createMedia.mutate({
         projectId: id,
-        storagePath: file.meta?.objectPath || file.uploadURL, // Depends on what uploader returns
-        url: file.uploadURL, 
+        storagePath: objectPath,
+        url: objectPath, // Use the /objects/... path which our server can serve
         filename: file.name,
         mimeType: file.type,
         fileSize: file.size,
       });
+      
+      // Clean up the mapping
+      filePathMapRef.current.delete(file.id);
     });
   };
 
@@ -65,8 +77,8 @@ export default function ProjectDetails() {
     });
     const { uploadURL, objectPath } = await res.json();
     
-    // Pass metadata to Uppy file object so we can use it in onComplete
-    file.meta = { ...file.meta, objectPath };
+    // Store the mapping using file.id
+    filePathMapRef.current.set(file.id, objectPath);
     
     return {
       method: "PUT" as const,
