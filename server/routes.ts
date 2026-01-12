@@ -11,9 +11,38 @@ import { batchProcess } from "./replit_integrations/batch";
 
 // Integration imports
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
-import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import { registerObjectStorageRoutes, ObjectStorageService } from "./replit_integrations/object_storage";
 import { registerChatRoutes } from "./replit_integrations/chat";
 import { registerImageRoutes } from "./replit_integrations/image";
+
+// Helper to convert object storage file to base64 data URL
+async function getImageAsBase64(objectPath: string): Promise<string | null> {
+  try {
+    const objectStorageService = new ObjectStorageService();
+    const file = await objectStorageService.getObjectEntityFile(objectPath);
+    
+    // Get file metadata for content type
+    const [metadata] = await file.getMetadata();
+    const contentType = metadata.contentType || "image/jpeg";
+    
+    // Download file contents
+    const chunks: Buffer[] = [];
+    const stream = file.createReadStream();
+    
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("end", () => {
+        const buffer = Buffer.concat(chunks);
+        const base64 = buffer.toString("base64");
+        resolve(`data:${contentType};base64,${base64}`);
+      });
+    });
+  } catch (error) {
+    console.error("Error converting image to base64:", error);
+    return null;
+  }
+}
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -118,11 +147,22 @@ export async function registerRoutes(
     // Background processing
     (async () => {
       try {
-        // 1. Analyze images
-        await batchProcess(mediaItems, async (item) => {
+        // 1. Analyze images - only process image files, skip videos
+        const imageItems = mediaItems.filter(item => 
+          item.mimeType?.startsWith("image/")
+        );
+        
+        await batchProcess(imageItems, async (item) => {
           if (!item.url) return;
           
           try {
+            // Convert the stored object path to base64 for OpenAI Vision API
+            const base64Url = await getImageAsBase64(item.url);
+            if (!base64Url) {
+              console.error(`Failed to get base64 for media ${item.id}`);
+              return;
+            }
+            
             const response = await openai.chat.completions.create({
               model: "gpt-4o", // Multimodal model
               messages: [
@@ -130,7 +170,7 @@ export async function registerRoutes(
                   role: "user",
                   content: [
                     { type: "text", text: "Describe this image in detail for a visual story. Focus on mood, lighting, and key subjects." },
-                    { type: "image_url", image_url: { url: item.url } },
+                    { type: "image_url", image_url: { url: base64Url } },
                   ],
                 },
               ],
