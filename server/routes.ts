@@ -131,10 +131,6 @@ export async function registerRoutes(
     if (!project) return res.status(404).json({ message: "Project not found" });
     if (project.userId !== req.user.claims.sub) return res.status(401).json({ message: "Unauthorized" });
 
-    // Start background analysis
-    // In a real app, this would be a proper background job.
-    // Here we'll fire and forget (or do a small batch).
-    
     const mediaItems = await storage.getMediaItems(id);
     
     if (mediaItems.length === 0) {
@@ -144,9 +140,69 @@ export async function registerRoutes(
     // Update status
     await storage.updateProject(id, { status: "analyzing" });
 
+    // Helper function to test AI connection
+    const testAIConnection = async (): Promise<boolean> => {
+      try {
+        await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: "test" }],
+          max_tokens: 5,
+        });
+        return true;
+      } catch (e) {
+        console.error("AI connection test failed:", e);
+        return false;
+      }
+    };
+
+    // Fallback: Create basic scenes without AI
+    const createFallbackScenes = async () => {
+      console.log("Using fallback scene generation (no AI)");
+      
+      // Group media into scenes (3-5 images per scene)
+      const IMAGES_PER_SCENE = 4;
+      const imageItems = mediaItems.filter(item => item.mimeType?.startsWith("image/"));
+      
+      // Sort by filename or creation date if available
+      const sortedItems = [...imageItems].sort((a, b) => {
+        const nameA = a.fileName || "";
+        const nameB = b.fileName || "";
+        return nameA.localeCompare(nameB);
+      });
+
+      const sceneCount = Math.ceil(sortedItems.length / IMAGES_PER_SCENE);
+      
+      for (let i = 0; i < sceneCount; i++) {
+        const sceneMedia = sortedItems.slice(i * IMAGES_PER_SCENE, (i + 1) * IMAGES_PER_SCENE);
+        
+        const newScene = await storage.createScene({
+          projectId: id,
+          title: `Scene ${i + 1}`,
+          narrationText: `Add narration for scene ${i + 1}...`,
+          orderIndex: i,
+        });
+        
+        // Assign media to scene
+        for (const item of sceneMedia) {
+          await storage.updateMediaItem(item.id, { sceneId: newScene.id });
+        }
+      }
+      
+      await storage.updateProject(id, { status: "ready" });
+    };
+
     // Background processing
     (async () => {
       try {
+        // Test AI connection first
+        const aiAvailable = await testAIConnection();
+        
+        if (!aiAvailable) {
+          console.log("AI not available, using fallback");
+          await createFallbackScenes();
+          return;
+        }
+
         // 1. Analyze images - only process image files, skip videos
         const imageItems = mediaItems.filter(item => 
           item.mimeType?.startsWith("image/")
@@ -217,7 +273,6 @@ export async function registerRoutes(
         const sequenceData = JSON.parse(sequenceResponse.choices[0]?.message?.content || "{}");
         
         if (sequenceData.scenes) {
-          // Clear existing scenes? Maybe. For now, just append.
           for (const [index, scene] of sequenceData.scenes.entries()) {
             const newScene = await storage.createScene({
               projectId: id,
@@ -227,7 +282,6 @@ export async function registerRoutes(
             });
             
             // Assign media to scene
-            // Note: Our schema has mediaItems.sceneId. So we update media items.
             if (scene.mediaIds && Array.isArray(scene.mediaIds)) {
               for (const mediaId of scene.mediaIds) {
                 await storage.updateMediaItem(mediaId, { sceneId: newScene.id });
@@ -239,8 +293,14 @@ export async function registerRoutes(
         await storage.updateProject(id, { status: "ready" });
 
       } catch (error) {
-        console.error("Analysis failed", error);
-        await storage.updateProject(id, { status: "failed" });
+        console.error("Analysis failed, falling back to basic scenes", error);
+        // On AI failure, use fallback
+        try {
+          await createFallbackScenes();
+        } catch (fallbackError) {
+          console.error("Fallback also failed", fallbackError);
+          await storage.updateProject(id, { status: "failed" });
+        }
       }
     })();
 
