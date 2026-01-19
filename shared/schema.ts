@@ -211,8 +211,6 @@ export const insertSceneSchema = {} as any;
 export const insertExportSchema = {} as any;
 */
 
-export type InsertConversation = z.infer<typeof insertConversationSchema>;
-export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertMediaItem = z.infer<typeof insertMediaItemSchema>;
 export type InsertScene = z.infer<typeof insertSceneSchema>;
