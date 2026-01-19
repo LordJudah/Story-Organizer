@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import ProjectDetails from "@/pages/ProjectDetails";
+import Settings from "@/pages/Settings";
 import Landing from "@/pages/Landing";
 import { Loader2 } from "lucide-react";
 
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/projects" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/project/:id" component={() => <ProtectedRoute component={ProjectDetails} />} />
+      <Route path="/settings" component={() => <ProtectedRoute component={Settings} />} />
       <Route component={NotFound} />
     </Switch>
   );
