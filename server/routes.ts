@@ -44,11 +44,17 @@ async function getImageAsBase64(objectPath: string): Promise<string | null> {
   }
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+// Lazy-initialize OpenAI client to ensure env vars are available
+let _openai: OpenAI | null = null;
+function getOpenAI(): OpenAI {
+  if (!_openai) {
+    _openai = new OpenAI({
+      apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+      baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+    });
+  }
+  return _openai;
+}
 
 export async function registerRoutes(
   httpServer: Server,
@@ -143,7 +149,7 @@ export async function registerRoutes(
     // Helper function to test AI connection
     const testAIConnection = async (): Promise<boolean> => {
       try {
-        await openai.chat.completions.create({
+        await getOpenAI().chat.completions.create({
           model: "gpt-4o-mini",
           messages: [{ role: "user", content: "test" }],
           max_tokens: 5,
@@ -219,7 +225,7 @@ export async function registerRoutes(
               return;
             }
             
-            const response = await openai.chat.completions.create({
+            const response = await getOpenAI().chat.completions.create({
               model: "gpt-4o", // Multimodal model
               messages: [
                 {
@@ -246,7 +252,7 @@ export async function registerRoutes(
         
         const mediaContext = analyzedMedia.map(m => `ID: ${m.id}, Desc: ${m.description}`).join("\n");
         
-        const sequenceResponse = await openai.chat.completions.create({
+        const sequenceResponse = await getOpenAI().chat.completions.create({
           model: "gpt-4o",
           messages: [
             { 
@@ -392,7 +398,7 @@ export async function registerRoutes(
       const tone = project.tone || "Documentary";
       const prompt = project.prompt || project.description || "Create a cohesive story";
       
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAI().chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
