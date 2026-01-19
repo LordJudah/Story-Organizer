@@ -64,10 +64,10 @@ export function CreateProjectDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent 
-        className="sm:max-w-[500px] glass-panel border-border/50"
+        className="sm:max-w-[500px] max-h-[90vh] flex flex-col glass-panel border-border/50"
         onPointerDownOutside={(e) => e.preventDefault()}
       >
-        <DialogHeader>
+        <DialogHeader className="shrink-0">
           <DialogTitle className="font-display text-2xl">Create Story</DialogTitle>
           <DialogDescription>
             Start a new visual storytelling project.
@@ -75,7 +75,7 @@ export function CreateProjectDialog() {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={handleFormSubmit} className="space-y-6 pt-4">
+          <form onSubmit={handleFormSubmit} className="flex-1 min-h-0 overflow-y-auto space-y-6 pt-4">
             <FormField
               control={form.control}
               name="title"
@@ -165,7 +165,7 @@ export function CreateProjectDialog() {
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="shrink-0 pt-4">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={createProject.isPending}>
                 {createProject.isPending ? "Creating..." : "Create Project"}
