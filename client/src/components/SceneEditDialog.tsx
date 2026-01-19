@@ -68,7 +68,8 @@ export function SceneEditDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-6 py-4">
+        <ScrollArea className="flex-1 min-h-0 h-full">
+          <div className="space-y-6 py-4 pr-4 pb-6">
           <div className="space-y-2">
             <Label htmlFor="scene-title">Scene Title</Label>
             <Input
@@ -188,7 +189,8 @@ export function SceneEditDialog({
               </div>
             )}
           </div>
-        </div>
+          </div>
+        </ScrollArea>
 
         <DialogFooter className="shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="button-cancel-scene">
