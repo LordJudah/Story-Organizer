@@ -137,7 +137,7 @@ export function SceneEditDialog({
                           </div>
                         ) : (
                           <img
-                            src={`/api/objects/read?path=${encodeURIComponent(media.url)}`}
+                            src={media.url}
                             alt={media.filename}
                             className="w-full h-full object-cover"
                           />
@@ -165,7 +165,7 @@ export function SceneEditDialog({
                       </div>
                     ) : (
                       <img
-                        src={`/api/objects/read?path=${encodeURIComponent(media.url)}`}
+                        src={media.url}
                         alt={media.filename}
                         className="w-full h-full object-cover"
                       />

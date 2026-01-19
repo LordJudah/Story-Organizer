@@ -337,7 +337,7 @@ export default function ProjectDetails() {
                         <div className="w-32 aspect-video bg-muted rounded-lg overflow-hidden flex-shrink-0 relative">
                           {thumbnailMedia ? (
                             <img
-                              src={`/api/objects/read?path=${encodeURIComponent(thumbnailMedia.url)}`}
+                              src={thumbnailMedia.url}
                               alt={thumbnailMedia.filename}
                               className="w-full h-full object-cover"
                             />
@@ -378,7 +378,7 @@ export default function ProjectDetails() {
                                   >
                                     {media.mimeType.startsWith("image") ? (
                                       <img
-                                        src={`/api/objects/read?path=${encodeURIComponent(media.url)}`}
+                                        src={media.url}
                                         alt=""
                                         className="w-full h-full object-cover"
                                       />
