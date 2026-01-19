@@ -101,20 +101,49 @@ export function useDeleteProject() {
 
 export function useAnalyzeProject() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async (id: number) => {
       const url = buildUrl(api.projects.analyze.path.replace(':id', ':id'), { id });
-      // Note: The manifest path has :id, replacement needs to be correct.
-      // Assuming buildUrl handles :id correctly if it's in the path string.
       const res = await fetch(url, {
         method: "POST",
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to start analysis");
+      
+      // Poll for completion since analysis runs in background
+      const pollForCompletion = async () => {
+        const projectUrl = buildUrl(api.projects.get.path, { id });
+        for (let i = 0; i < 30; i++) { // Poll for up to 30 seconds
+          await new Promise(r => setTimeout(r, 1000));
+          const projectRes = await fetch(projectUrl, { credentials: "include" });
+          if (projectRes.ok) {
+            const project = await projectRes.json();
+            if (project.status === "ready" || project.status === "failed") {
+              // Invalidate all relevant queries - use the actual api path patterns
+              queryClient.invalidateQueries({ queryKey: [api.projects.get.path, id] });
+              queryClient.invalidateQueries({ queryKey: ["/api/projects/:projectId/scenes", id] });
+              queryClient.invalidateQueries({ queryKey: ["/api/projects/:projectId/media", id] });
+              return project.status;
+            }
+          }
+        }
+        return "timeout";
+      };
+      
+      pollForCompletion().then(status => {
+        if (status === "ready") {
+          toast({ title: "Analysis Complete", description: "Your scenes are ready!" });
+        } else if (status === "failed") {
+          toast({ title: "Analysis Failed", description: "There was a problem analyzing your media.", variant: "destructive" });
+        }
+      });
+      
       return res.json();
     },
     onSuccess: () => {
-      toast({ title: "Analysis Started", description: "AI is analyzing your media..." });
+      toast({ title: "Analysis Started", description: "Creating scenes from your media..." });
     },
   });
 }
