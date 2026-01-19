@@ -154,9 +154,9 @@ export default function ProjectDetails() {
   if (!project) return <div>Project not found</div>;
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen bg-background">
       <Sidebar />
-      <main className="flex-1 flex flex-col min-w-0">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <header className="border-b border-border bg-card/50 p-6 flex items-center justify-between backdrop-blur-sm sticky top-0 z-10">
           <div className="flex items-center gap-4">
@@ -203,8 +203,8 @@ export default function ProjectDetails() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <div className="flex-1 min-h-0 flex flex-col">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 min-h-0 flex flex-col">
             <div className="px-6 border-b border-border bg-background/50">
               <TabsList className="bg-transparent h-12 gap-6">
                 <TabsTrigger 
