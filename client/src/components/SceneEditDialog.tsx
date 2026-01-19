@@ -59,8 +59,8 @@ export function SceneEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-auto max-h-[80vh] overflow-y-auto flex flex-col fixed left-[50%] top-[50%] -translate-x-1/2 -translate-y-1/2">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <span className="text-muted-foreground font-mono text-sm">Scene {scene.orderIndex + 1}</span>
             <span className="text-muted-foreground">/</span>
@@ -68,7 +68,7 @@ export function SceneEditDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-6 py-4">
           <div className="space-y-2">
             <Label htmlFor="scene-title">Scene Title</Label>
             <Input
@@ -190,7 +190,7 @@ export function SceneEditDialog({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)} data-testid="button-cancel-scene">
             Cancel
           </Button>
