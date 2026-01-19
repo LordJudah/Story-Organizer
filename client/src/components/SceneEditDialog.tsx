@@ -6,11 +6,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Film, ImageIcon, Check, X, GripVertical, Trash2 } from "lucide-react";
+import { Film, ImageIcon, Check, X, GripVertical, Trash2, Sparkles, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import type { Scene, MediaItem } from "@shared/schema";
 
 interface SceneEditDialogProps {
   scene: Scene | null;
+  projectId: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: { title: string; narrationText: string }) => void;
@@ -22,6 +25,7 @@ interface SceneEditDialogProps {
 
 export function SceneEditDialog({
   scene,
+  projectId,
   open,
   onOpenChange,
   onSave,
@@ -33,6 +37,8 @@ export function SceneEditDialog({
   const [title, setTitle] = useState("");
   const [narrationText, setNarrationText] = useState("");
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (scene && open) {
@@ -55,6 +61,33 @@ export function SceneEditDialog({
 
   const handleSave = () => {
     onSave({ title, narrationText });
+  };
+
+  const handleGenerateNarration = async () => {
+    if (!scene) return;
+    
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest(
+        "POST",
+        `/api/projects/${projectId}/scenes/${scene.id}/generate-narration`
+      );
+      const updatedScene = await response.json();
+      setNarrationText(updatedScene.narrationText || "");
+      toast({
+        title: "Narration Generated",
+        description: "AI has created narration for this scene.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/projects', projectId, 'scenes'] });
+    } catch (error: any) {
+      toast({
+        title: "Generation Failed",
+        description: error.message || "Could not generate narration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -82,7 +115,28 @@ export function SceneEditDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="scene-narration">Narration Text</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="scene-narration">Narration Text</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleGenerateNarration}
+                disabled={isGenerating || sceneMedia.length === 0}
+                data-testid="button-generate-narration"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-3 h-3 mr-1.5" />
+                    Generate with AI
+                  </>
+                )}
+              </Button>
+            </div>
             <Textarea
               id="scene-narration"
               value={narrationText}

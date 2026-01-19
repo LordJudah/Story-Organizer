@@ -453,6 +453,7 @@ export default function ProjectDetails() {
 
       <SceneEditDialog
         scene={selectedScene}
+        projectId={id}
         open={sceneDialogOpen}
         onOpenChange={handleSceneDialogClose}
         onSave={handleSceneSave}

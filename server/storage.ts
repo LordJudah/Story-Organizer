@@ -1,7 +1,7 @@
 import { 
   users, projects, mediaItems, scenes, exports as exportTable,
   type User, type Project, type MediaItem, type Scene, type Export,
-  type InsertUser, type InsertProject, type InsertMediaItem, type InsertScene, type InsertExport
+  type InsertProject, type ServerInsertProject, type InsertMediaItem, type InsertScene, type InsertExport
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -13,7 +13,7 @@ export interface IStorage {
   // Projects
   getProjects(userId: string): Promise<Project[]>;
   getProject(id: number): Promise<Project | undefined>;
-  createProject(project: InsertProject): Promise<Project>;
+  createProject(project: ServerInsertProject): Promise<Project>;
   updateProject(id: number, project: Partial<InsertProject>): Promise<Project>;
   deleteProject(id: number): Promise<void>;
   
@@ -55,7 +55,7 @@ export class DatabaseStorage implements IStorage {
     return project;
   }
 
-  async createProject(project: InsertProject): Promise<Project> {
+  async createProject(project: ServerInsertProject): Promise<Project> {
     const [newProject] = await db.insert(projects).values(project).returning();
     return newProject;
   }

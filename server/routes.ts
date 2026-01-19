@@ -165,8 +165,8 @@ export async function registerRoutes(
       
       // Sort by filename or creation date if available
       const sortedItems = [...imageItems].sort((a, b) => {
-        const nameA = a.fileName || "";
-        const nameB = b.fileName || "";
+        const nameA = a.filename || "";
+        const nameB = b.filename || "";
         return nameA.localeCompare(nameB);
       });
 
@@ -345,6 +345,94 @@ export async function registerRoutes(
     const projectId = parseInt(req.params.projectId);
     const scenes = await storage.getScenes(projectId);
     res.json(scenes);
+  });
+
+  // Generate narration for a scene using AI
+  app.post("/api/projects/:projectId/scenes/:sceneId/generate-narration", isAuthenticated, async (req: any, res) => {
+    const projectId = parseInt(req.params.projectId);
+    const sceneId = parseInt(req.params.sceneId);
+    
+    // Verify ownership
+    const project = await storage.getProject(projectId);
+    if (!project || project.userId !== req.user.claims.sub) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    // Get scene and its media
+    const scenes = await storage.getScenes(projectId);
+    const scene = scenes.find(s => s.id === sceneId);
+    if (!scene) {
+      return res.status(404).json({ message: "Scene not found" });
+    }
+    
+    const allMedia = await storage.getMediaItems(projectId);
+    const sceneMedia = allMedia.filter(m => m.sceneId === sceneId);
+    
+    try {
+      // Get image descriptions for context
+      const imageDescriptions = sceneMedia
+        .filter(m => m.mimeType?.startsWith("image/"))
+        .map(m => m.description || m.filename)
+        .join("; ");
+      
+      // If we have no descriptions, analyze images first
+      let contextText = imageDescriptions;
+      if (!contextText || contextText.trim() === "") {
+        // Try to generate descriptions from filenames
+        contextText = sceneMedia
+          .filter(m => m.mimeType?.startsWith("image/"))
+          .map(m => m.filename)
+          .join(", ");
+      }
+      
+      if (!contextText || sceneMedia.length === 0) {
+        return res.status(400).json({ message: "No media in this scene to generate narration from" });
+      }
+      
+      const tone = project.tone || "Documentary";
+      const prompt = project.prompt || project.description || "Create a cohesive story";
+      
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional storyteller and video narrator. Generate engaging voiceover narration for a scene in a ${tone.toLowerCase()} style video. The narration should be:
+- Natural and conversational
+- 2-4 sentences long
+- Evocative and descriptive
+- Suitable for voiceover
+
+Only return the narration text, nothing else.`
+          },
+          {
+            role: "user",
+            content: `Generate narration for Scene ${scene.orderIndex + 1} titled "${scene.title}".
+            
+Project context: ${prompt}
+
+This scene contains ${sceneMedia.length} media items: ${contextText}
+
+Generate compelling narration that tells the story of this scene.`
+          }
+        ],
+        max_tokens: 200,
+      });
+      
+      const narrationText = response.choices[0]?.message?.content?.trim() || "";
+      
+      if (!narrationText) {
+        return res.status(500).json({ message: "Failed to generate narration" });
+      }
+      
+      // Update the scene with the new narration
+      const updatedScene = await storage.updateScene(sceneId, { narrationText });
+      res.json(updatedScene);
+      
+    } catch (error) {
+      console.error("Failed to generate narration:", error);
+      res.status(500).json({ message: "Failed to generate narration. Please try again." });
+    }
   });
 
   // === EXPORTS ===

@@ -216,6 +216,9 @@ export type InsertMediaItem = z.infer<typeof insertMediaItemSchema>;
 export type InsertScene = z.infer<typeof insertSceneSchema>;
 export type InsertExport = z.infer<typeof insertExportSchema>;
 
+// Server-side types that include userId for internal use
+export type ServerInsertProject = InsertProject & { userId: string };
+
 export type Project = typeof projects.$inferSelect;
 export type MediaItem = typeof mediaItems.$inferSelect;
 export type Scene = typeof scenes.$inferSelect;
