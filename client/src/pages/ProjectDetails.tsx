@@ -238,7 +238,7 @@ export default function ProjectDetails() {
               </TabsList>
             </div>
 
-            <TabsContent value="media" className="flex-1 p-6 overflow-y-auto m-0">
+            <TabsContent value="media" className="flex-1 min-h-0 p-6 overflow-y-auto m-0">
               {mediaLoading ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
@@ -310,7 +310,7 @@ export default function ProjectDetails() {
               )}
             </TabsContent>
 
-            <TabsContent value="storyboard" className="flex-1 p-6 overflow-y-auto m-0">
+            <TabsContent value="storyboard" className="flex-1 min-h-0 p-6 overflow-y-auto m-0">
               <div className="max-w-3xl mx-auto space-y-4">
                 {scenes && scenes.length > 0 ? (
                   scenes.map((scene, index) => {
