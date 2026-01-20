@@ -92,7 +92,7 @@ export function SceneEditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col overflow-hidden fixed top-[5%] translate-y-0 my-4">
         <DialogHeader className="shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <span className="text-muted-foreground font-mono text-sm">Scene {scene.orderIndex + 1}</span>
