@@ -441,6 +441,68 @@ Generate compelling narration that tells the story of this scene.`
     }
   });
 
+  // Update a scene
+  app.patch(api.scenes.update.path, isAuthenticated, async (req: any, res) => {
+    const sceneId = parseInt(req.params.id);
+    
+    // Get the scene to find its project
+    const allScenes = await db.select().from(schema.scenes).where(eq(schema.scenes.id, sceneId));
+    const scene = allScenes[0];
+    if (!scene) {
+      return res.status(404).json({ message: "Scene not found" });
+    }
+    
+    // Verify ownership via project
+    const project = await storage.getProject(scene.projectId);
+    if (!project || project.userId !== req.user.claims.sub) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const input = api.scenes.update.input.parse(req.body);
+      const updatedScene = await storage.updateScene(sceneId, input);
+      res.json(updatedScene);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Failed to update scene" });
+    }
+  });
+
+  // Reorder scenes
+  app.post(api.scenes.reorder.path, isAuthenticated, async (req: any, res) => {
+    const projectId = parseInt(req.params.projectId);
+    
+    // Verify ownership
+    const project = await storage.getProject(projectId);
+    if (!project || project.userId !== req.user.claims.sub) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    try {
+      const input = api.scenes.reorder.input.parse(req.body);
+      
+      // Validate all scene IDs belong to this project
+      const existingScenes = await storage.getScenes(projectId);
+      const existingIds = new Set(existingScenes.map(s => s.id));
+      const invalidIds = input.sceneIds.filter(id => !existingIds.has(id));
+      
+      if (invalidIds.length > 0) {
+        return res.status(400).json({ message: "Invalid scene IDs provided" });
+      }
+      
+      await storage.reorderScenes(input.sceneIds);
+      const scenes = await storage.getScenes(projectId);
+      res.json(scenes);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({ message: err.errors[0].message });
+      }
+      res.status(500).json({ message: "Failed to reorder scenes" });
+    }
+  });
+
   // === EXPORTS ===
   app.post(api.exports.create.path, isAuthenticated, async (req: any, res) => {
     const projectId = parseInt(req.params.projectId);
